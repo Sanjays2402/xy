@@ -1,6 +1,8 @@
 ---
 title: Pie and Donut Charts in Python
 description: Build polished pie, donut, progress-ring, and gauge blocks in Python with xy and Reflex.
+components:
+  - xy.pie_chart
 ---
 
 # Pie and Donut Charts in Python

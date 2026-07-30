@@ -2295,6 +2295,7 @@ def test_chart_gallery_pages_append_factory_api_tables() -> None:
         ),
         "/charts/radar-chart/": ("xy.radar_chart",),
         "/charts/radial-bar-chart/": ("xy.polar_bar_chart",),
+        "/charts/pie-chart/": ("xy.pie_chart",),
         "/charts/wind-rose/": ("xy.wind_rose",),
         "/charts/bar-chart/": ("xy.bar_chart", "xy.column_chart"),
         "/charts/histogram/": ("xy.histogram_chart",),
@@ -2388,12 +2389,13 @@ def test_polar_axis_api_expands_forwarded_axis_props() -> None:
     theta_reference, radial_reference = component_api_references(("xy.theta_axis", "xy.r_axis"))
     theta_names = tuple(parameter.name for parameter in theta_reference.parameters)
     radial_names = tuple(parameter.name for parameter in radial_reference.parameters)
-    refused = frozenset(_POLAR_INERT_AXIS_KEYWORDS)
+    theta_refused = frozenset({*_POLAR_INERT_AXIS_KEYWORDS, "reverse"})
+    radial_refused = frozenset(_POLAR_INERT_AXIS_KEYWORDS)
     x_axis_names = tuple(
-        name for name in inspect.signature(xy.x_axis).parameters if name not in refused
+        name for name in inspect.signature(xy.x_axis).parameters if name not in theta_refused
     )
     y_axis_names = tuple(
-        name for name in inspect.signature(xy.y_axis).parameters if name not in refused
+        name for name in inspect.signature(xy.y_axis).parameters if name not in radial_refused
     )
 
     assert theta_names[:5] == ("unit", "zero", "direction", "sector", "grid_shape")
@@ -2402,7 +2404,9 @@ def test_polar_axis_api_expands_forwarded_axis_props() -> None:
     assert radial_names[2:] == y_axis_names
     assert "**kwargs" not in {*theta_names, *radial_names}
     # The polar axes refuse these outright, so the table must not offer them.
-    assert not refused & {*theta_names, *radial_names}
+    assert not theta_refused & set(theta_names)
+    assert not radial_refused & set(radial_names)
+    assert "reverse" in radial_names
     assert theta_reference.parameters[theta_names.index("tick_values")].description
     assert theta_reference.parameters[theta_names.index("sector")].description
     assert radial_reference.parameters[radial_names.index("domain")].description
